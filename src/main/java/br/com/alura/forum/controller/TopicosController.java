@@ -1,13 +1,16 @@
 package br.com.alura.forum.controller;
 
+import java.net.URI;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import br.com.alura.forum.controller.dto.TopicoDto;
 import br.com.alura.forum.controller.form.TopicoForm;
@@ -43,11 +46,21 @@ public class TopicosController {
 	}
 	
 	@PostMapping //usando o metodo POST.
-	public void cadastrar (@RequestBody TopicoForm form) { // RequestBody: recebe os dados por parametro do corpo da requisição.
-		//padrão DTO (TopicoForm): manda dados do cliente para a api.
+	//dentro do ResponseEntity vem o tipo de retorno que virá dentro do corpo da requisição.
+	public ResponseEntity<TopicoDto> cadastrar (@RequestBody TopicoForm form, UriComponentsBuilder uriBuilder) { 
+		// RequestBody: recebe os dados por parametro do corpo da requisição.
+		// UriComponentsBuilder: é injetodo automaticamente pelo spring. ajuda na construção da uri.
+		// padrão DTO (TopicoForm): manda dados do cliente para a api.
 		Topico topico = form.converter(cursoRepository);
-		
+
 		topicoRepository.save(topico);
+		
+		URI uri = uriBuilder.path("/topicos/{id}")//inicio da uri do recurso.
+				.buildAndExpand(topico.getId())//pega o id do topico e inclui na formação da uri de forma dinamica.
+				.toUri();//cria a uri completa, incluindo o servidor.
+		
+		//o metodo created retorna o codigo 201 que precisa do uma URI e Uma representação do recurso no corpo da requisição.
+		return ResponseEntity.created(uri).body(new TopicoDto(topico)); 
 	}
 
 }
