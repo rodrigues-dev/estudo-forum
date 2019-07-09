@@ -60,7 +60,9 @@ public class TopicosController {
 				.toUri();//cria a uri completa, incluindo o servidor.
 		
 		//o metodo created retorna o codigo 201 que precisa do uma URI e Uma representação do recurso no corpo da requisição.
-		return ResponseEntity.created(uri).body(new TopicoDto(topico)); 
+		return ResponseEntity.created(uri).body(new TopicoDto(topico));
+		//metodos com retorno void, caso ocorra tudo certo, retorna o codigo 200 (ok) por padrão.
 	}
+	
 
 }
