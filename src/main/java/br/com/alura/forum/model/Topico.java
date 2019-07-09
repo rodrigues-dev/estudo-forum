@@ -32,6 +32,17 @@ public class Topico {
 	@OneToMany(mappedBy = "topico")//um tópico pode ter varias respostas; mappedBy: para avisar que na classe topico vai estar mepeado esse relacionamento.
 	private List<Resposta> respostas = new ArrayList<>();
 	
+	public Topico() {
+		// TODO Auto-generated constructor stub
+	}
+	
+	public Topico(String titulo, String mensagem, Curso curso) {
+		super();
+		this.titulo = titulo;
+		this.mensagem = mensagem;
+		this.curso = curso;
+	}
+
 	/*
 	 * Getters and Setters
 	 */
