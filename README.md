@@ -1,2 +1,2 @@
-# ApiRestForum
-A API to learn about web service.
+# Forum
+The Forum is a API REST to learn about web service.
