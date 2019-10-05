@@ -3,6 +3,8 @@ package br.com.alura.forum.controller;
 import java.net.URI;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,8 +49,9 @@ public class TopicosController {
 	
 	@PostMapping //usando o metodo POST.
 	//dentro do ResponseEntity vem o tipo de retorno que virá dentro do corpo da requisição.
-	public ResponseEntity<TopicoDto> cadastrar (@RequestBody TopicoForm form, UriComponentsBuilder uriBuilder) { 
+	public ResponseEntity<TopicoDto> cadastrar (@RequestBody @Valid TopicoForm form, UriComponentsBuilder uriBuilder) { 
 		// RequestBody: recebe os dados por parametro do corpo da requisição.
+		// Valid: é uma especificação do Bean Validation que informa ao spring que deve rodar as validações que estão anotadas no TopicoForm.
 		// UriComponentsBuilder: é injetodo automaticamente pelo spring. ajuda na construção da uri.
 		// padrão DTO (TopicoForm): manda dados do cliente para a api.
 		Topico topico = form.converter(cursoRepository);
