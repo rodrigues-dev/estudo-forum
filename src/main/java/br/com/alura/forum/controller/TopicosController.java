@@ -8,12 +8,14 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import br.com.alura.forum.controller.dto.DetalhesDoTopicoDto;
 import br.com.alura.forum.controller.dto.TopicoDto;
 import br.com.alura.forum.controller.form.TopicoForm;
 import br.com.alura.forum.model.Topico;
@@ -67,5 +69,13 @@ public class TopicosController {
 		//metodos com retorno void, caso ocorra tudo certo, retorna o codigo 200 (ok) por padrão.
 	}
 	
+	@GetMapping("/{id}") // URL dinamica: recebe como parte da URL o id de forma dinamica 
+	// @PathVariable: indica que recebera o id pela URL mapeado no @GetMapping("/{id}") e ambos precisam ter o mesmo nome (id).
+	public DetalhesDoTopicoDto detalhar (@PathVariable Long id) { // para usar outra nome no parametro do método: @PathVariable("id") Long codigo
+		
+		Topico topico = topicoRepository.getOne(id); // retorna um registro pelo id
+		
+		return new DetalhesDoTopicoDto(topico);
+	}
 
 }
