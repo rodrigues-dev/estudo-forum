@@ -8,6 +8,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -55,6 +56,7 @@ public class TopicosController {
 	}
 	
 	@PostMapping //usando o metodo POST.
+	@Transactional // Anotação recomendada sempre que envolver uma operação de salvar, atualizar ou deletar (transactional)
 	//dentro do ResponseEntity vem o tipo de retorno que virá dentro do corpo da requisição.
 	public ResponseEntity<TopicoDto> cadastrar (@RequestBody @Valid TopicoForm form, UriComponentsBuilder uriBuilder) { 
 		// RequestBody: recebe os dados por parametro do corpo da requisição.
@@ -93,4 +95,11 @@ public class TopicosController {
 		return ResponseEntity.ok(new TopicoDto(topico));
 	}
 
+	@DeleteMapping("/{id}")
+	@Transactional
+	public ResponseEntity<?> remover (@PathVariable Long id) {
+		topicoRepository.deleteById(id); // basta chamar o método deleteById do Repository para deletar um recurso do banco
+		
+		return ResponseEntity.ok().build();
+	}
 }
