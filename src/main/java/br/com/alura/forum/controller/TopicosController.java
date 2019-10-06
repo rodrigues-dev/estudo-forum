@@ -2,6 +2,7 @@ package br.com.alura.forum.controller;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -78,11 +79,17 @@ public class TopicosController {
 	
 	@GetMapping("/{id}") // URL dinamica: recebe como parte da URL o id de forma dinamica 
 	// @PathVariable: indica que recebera o id pela URL mapeado no @GetMapping("/{id}") e ambos precisam ter o mesmo nome (id).
-	public DetalhesDoTopicoDto detalhar (@PathVariable Long id) { // para usar outra nome no parametro do método: @PathVariable("id") Long codigo
+	public ResponseEntity<DetalhesDoTopicoDto>  detalhar (@PathVariable Long id) { // para usar outra nome no parametro do método: @PathVariable("id") Long codigo
+
+		//Topico topico = topicoRepository.getOne(id); // retorna um registro pelo id. sempre considera que o id passado existe
 		
-		Topico topico = topicoRepository.getOne(id); // retorna um registro pelo id
+		Optional<Topico> topico = topicoRepository.findById(id); // retorna um optional que verifica se existe um recurso com o id informado
 		
-		return new DetalhesDoTopicoDto(topico);
+		if (topico.isPresent()) { // se existe
+			return ResponseEntity.ok(new DetalhesDoTopicoDto(topico.get())); // topico.get(): por ser um optional precisa do .get para pegar o objeto topico.
+		}
+		
+		return ResponseEntity.notFound().build(); // retorno o status 404 de recurso não encontrado
 	}
 	
 	@PutMapping("/{id}") // método utilizado para realizar atualização de registros. id informa qual recurso será atualizado.
@@ -90,16 +97,29 @@ public class TopicosController {
 	@Transactional // informa ao spring que após a execução do método, deve executar as alterações no banco de dados
 	public ResponseEntity<TopicoDto> atualizar (@PathVariable Long id, @RequestBody @Valid AtualizacaoTopicoForm form){
 		
-		Topico topico = form.atualizar(id, topicoRepository);
+		Optional<Topico> optional = topicoRepository.findById(id);
 		
-		return ResponseEntity.ok(new TopicoDto(topico));
+		if (optional.isPresent()) { 
+			Topico topico = form.atualizar(id, topicoRepository);
+			
+			return ResponseEntity.ok(new TopicoDto(topico));
+		}
+		
+		return ResponseEntity.notFound().build();
 	}
 
 	@DeleteMapping("/{id}")
 	@Transactional
 	public ResponseEntity<?> remover (@PathVariable Long id) {
-		topicoRepository.deleteById(id); // basta chamar o método deleteById do Repository para deletar um recurso do banco
 		
-		return ResponseEntity.ok().build();
+		Optional<Topico> optional = topicoRepository.findById(id);
+		
+		if (optional.isPresent()) {
+			topicoRepository.deleteById(id); // basta chamar o método deleteById do Repository para deletar um recurso do banco
+			
+			return ResponseEntity.ok().build();	
+		}
+		
+		return ResponseEntity.notFound().build();
 	}
 }
