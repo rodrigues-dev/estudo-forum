@@ -14,7 +14,7 @@ public class TopicoForm {
 	@NotNull @NotEmpty //validação do bean validation. obs: existem varios tipos de validação e ainda permite que a gente cria as nossas validações
 	private String titulo;
 	
-	@NotNull @NotEmpty @Length(max = 200) //@Length: validação de tamanho de string
+	@NotNull @NotEmpty //@Length: validação de tamanho de string
 	private String mensagem;
 	
 	@NotNull @NotEmpty
