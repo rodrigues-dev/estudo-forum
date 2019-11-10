@@ -22,7 +22,7 @@ public class Topico {
 	private Long id;
 	private String titulo;
 	private String mensagem;
-	private LocalDateTime dataCriacao;
+	private LocalDateTime dataCriacao = LocalDateTime.now();
 	@Enumerated(EnumType.STRING)//grava o nome do enum como string
 	private StatusTopico status = StatusTopico.NAO_RESPONDIDO;
 	@ManyToOne//cardinalidade: um autor pode estar relacionado a vários topicos
