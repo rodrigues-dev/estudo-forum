@@ -1,7 +1,7 @@
 package br.com.alura.forum.repository;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import br.com.alura.forum.model.Topico;
@@ -16,8 +16,8 @@ import br.com.alura.forum.model.Topico;
 public interface TopicoRepository extends JpaRepository<Topico, Long> {
 
 	//cria uma query automaticamente usando a convenão do Data JPA repository: findBy<<nome do atributo>> ou <<classe relacionamento_atributo da classe>>
-	List<Topico> findByCurso_Nome(String nomeCurso);//so com essa assinatura o jpa já monta a quary.
-	
+	Page<Topico> findByCurso_Nome(String nomeCurso, Pageable paginacao);//so com essa assinatura o jpa já monta a quary.
+	//Page e Pageable para trabalhar com paginação
 	/*
 	 * caso eu queira crias na mão a mesma coisa que o metodo findByCurso_Nome faz.
 	 * devo escrever a consulta em JPQL.

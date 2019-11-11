@@ -1,23 +1,25 @@
 package br.com.alura.forum.controller;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Optional;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -41,17 +43,23 @@ public class TopicosController {
 	
 	@GetMapping //usando o metodo GET.
 	//para passar parametro no navegador: ?nomeCurso=Spring+Boot
-	public List<TopicoDto> lista(String nomeCurso) {//recebe os dados por parametros da url.
-		//padrão DTO (TopicoDto): manda dados da api para o cliente.
-		List<Topico> Topicos;
+	public Page<TopicoDto> lista(@RequestParam(required = false) String nomeCurso, //@RequestParam avisa ao Spring que será enviado um parametro obrigatório
+//		@PageableDefault: define o defauld para ordenacao e etc caso não seja passado esses parametros
+			@PageableDefault(sort = "id", direction = Direction.DESC) Pageable paginacao) { //recebe a paginacao com o padrão spring data
+//		ex. de parametros de url do pageable: page=0&size=10&sort=id,desc&sort=dataCriacao,asc (obs: todos os campos são opcionais)	
+//			@RequestParam int pagina, @RequestParam int qtd, @RequestParam String ordenacao) {//recebe os dados por parametros da url.
 		
-		if (nomeCurso == null) {
+		//A interface Pageable é do spring data e é usada para fazer paginação
+//		Pageable paginacao = PageRequest.of(pagina, qtd, Direction.DESC, ordenacao); //PageRequest.of é uma implementação do Pageable que recebe a pagina e qtd para fazer a paginação
+		//Direction.DESC define como será a ordenação. Ex.: crescente, decrecente e etc
+		//a variável ordenacao define qual atributo será usado como referencia de ordenação
+		
+		//padrão DTO (TopicoDto): manda dados da api para o cliente.
+		Page<Topico> Topicos = (nomeCurso == null ? //A classe Page recebe um generics e cria uma lista de objetos com informações extras de paginação (ex.: quantidade total de objetos da lista)
 			//usando os beneficios da injeção de dependencia: topicoRepository.findAll() do Data JPA, retorna todos os registros do banco.
-			Topicos = topicoRepository.findAll();	
-		} else {
+			topicoRepository.findAll(paginacao) : //o findAll recebe um Pageable e retorna uma pagina com a qtd prédefinida
 			//usando o padrao de nomenclatura do Data JPA (findByCurso_Nome) é criado automaticamente a quary filtrando por nome do curso.
-			Topicos = topicoRepository.findByCurso_Nome(nomeCurso);
-		}
+			topicoRepository.findByCurso_Nome(nomeCurso, paginacao));
 		
 		return TopicoDto.converter(Topicos);
 	}
