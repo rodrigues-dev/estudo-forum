@@ -1,7 +1,7 @@
 package br.com.alura.forum.repository;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import br.com.alura.forum.model.Topico;
@@ -13,10 +13,10 @@ import br.com.alura.forum.model.Topico;
  * 
  * o Spring Data JPA consegue gerar a query de consulta ao banco de dados baseado no nome do método na classe repository.
  */
-public interface TopicoRepository extends JpaRepository<Topico, Long> {
+public interface TopicoRepository extends JpaRepository<Topico, Long> {//entidade, tipo de chave da entidade.
 
 	//cria uma query automaticamente usando a convenão do Data JPA repository: findBy<<nome do atributo>> ou <<classe relacionamento_atributo da classe>>
-	List<Topico> findByCurso_Nome(String nomeCurso);//so com essa assinatura o jpa já monta a quary.
+	Page<Topico> findByCurso_Nome(String nomeCurso, Pageable paginacao);//so com essa assinatura o jpa já monta a quary.
 	
 	/*
 	 * caso eu queira crias na mão a mesma coisa que o metodo findByCurso_Nome faz.

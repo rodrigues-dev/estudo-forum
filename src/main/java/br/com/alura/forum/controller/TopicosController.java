@@ -1,23 +1,25 @@
 package br.com.alura.forum.controller;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Optional;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -41,19 +43,37 @@ public class TopicosController {
 	
 	@GetMapping //usando o metodo GET.
 	//para passar parametro no navegador: ?nomeCurso=Spring+Boot
-	public List<TopicoDto> lista(String nomeCurso) {//recebe os dados por parametros da url.
+	public Page<TopicoDto> lista(@RequestParam(required = false) String nomeCurso, 
+			@PageableDefault(sort = "id", direction = Direction.DESC, size = 2) Pageable paginacao) {//recebe os dados por parametros da url.
+		// Exemplo de Pageable na URL: http://localhost:8080/topicos?page=0&size=3&sort=dataCriacao,asc
+		
 		//padrão DTO (TopicoDto): manda dados da api para o cliente.
-		List<Topico> Topicos;
+		
+		/* ## PAGINACAO - do DATA JPA do Spring ##
+		 * Pageable: interface que ajuda a trabalhar com paginação.
+		 * PageRequest.of(): classe que através do método estático .of cria uma paginacao.
+		 * Page<?>: interface que recebe além dos registros, informações como, total de registros, registros por pagina etc.
+		 * Ordenação: ordena a partir de um atributo da classe e o Enum Direction.
+		 * @PageableDefault: define valores default para os atributos do Pageable, caso não sejam informados na requisição.
+		 */
+		
+		/* Uso do Objeto Pageable recebido por parâmetro:
+		 * page: informa a pagina 
+		 * size: informa a quantidade de registro por pagina
+		 * sort: ordena os registros por um atributo específico e define se ordena de forma crescente (ASC) ou decrescente (DESC)
+		 Obs:o sort pode ser passado mais de uma vez. 
+		 Obs: o Pageable deixa opcional o uso dos atributos (page, size, sort)*/ 
+		
+		Page<Topico> topicos;
 		
 		if (nomeCurso == null) {
 			//usando os beneficios da injeção de dependencia: topicoRepository.findAll() do Data JPA, retorna todos os registros do banco.
-			Topicos = topicoRepository.findAll();	
+			 topicos = topicoRepository.findAll(paginacao);
 		} else {
 			//usando o padrao de nomenclatura do Data JPA (findByCurso_Nome) é criado automaticamente a quary filtrando por nome do curso.
-			Topicos = topicoRepository.findByCurso_Nome(nomeCurso);
+			topicos = topicoRepository.findByCurso_Nome(nomeCurso, paginacao);
 		}
-		
-		return TopicoDto.converter(Topicos);
+		return TopicoDto.converter(topicos);
 	}
 	
 	@PostMapping //usando o metodo POST.
@@ -62,7 +82,7 @@ public class TopicosController {
 	public ResponseEntity<TopicoDto> cadastrar (@RequestBody @Valid TopicoForm form, UriComponentsBuilder uriBuilder) { 
 		// RequestBody: recebe os dados por parametro do corpo da requisição.
 		// Valid: é uma especificação do Bean Validation que informa ao spring que deve rodar as validações que estão anotadas no TopicoForm.
-		// UriComponentsBuilder: é injetodo automaticamente pelo spring. ajuda na construção da uri.
+		// UriComponentsBuilder: o dominio da aplicação (ex.: http://minhaapi.com) é injetodo automaticamente pelo spring. ajuda na construção da uri.
 		// padrão DTO (TopicoForm): manda dados do cliente para a api.
 		Topico topico = form.converter(cursoRepository);
 
@@ -72,7 +92,7 @@ public class TopicosController {
 				.buildAndExpand(topico.getId())//pega o id do topico e inclui na formação da uri de forma dinamica.
 				.toUri();//cria a uri completa, incluindo o servidor.
 		
-		//o metodo created retorna o codigo 201 que precisa do uma URI e Uma representação do recurso no corpo da requisição.
+		//o metodo created retorna o codigo 201 que precisa do uma URI e Uma representação do recurso no corpo da requisição. (BOA PRÁTICA!!)
 		return ResponseEntity.created(uri).body(new TopicoDto(topico));
 		//metodos com retorno void, caso ocorra tudo certo, retorna o codigo 200 (ok) por padrão.
 	}
@@ -85,9 +105,9 @@ public class TopicosController {
 		
 		Optional<Topico> topico = topicoRepository.findById(id); // retorna um optional que verifica se existe um recurso com o id informado
 		
-		if (topico.isPresent()) { // se existe
+		if (topico.isPresent())  // se existe
 			return ResponseEntity.ok(new DetalhesDoTopicoDto(topico.get())); // topico.get(): por ser um optional precisa do .get para pegar o objeto topico.
-		}
+		
 		
 		return ResponseEntity.notFound().build(); // retorno o status 404 de recurso não encontrado
 	}
