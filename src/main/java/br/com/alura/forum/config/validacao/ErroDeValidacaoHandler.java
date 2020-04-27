@@ -13,27 +13,21 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-// essa classe será chamada para todo RestController, não precisa anotar nada nas classes controller
-@RestControllerAdvice //serve como interceptador de exceptions para fazer tratamentos de erro
-// existe tambem o @ControllerAdvice
+@RestControllerAdvice
 public class ErroDeValidacaoHandler {
 
 	@Autowired
-	private MessageSource messageSource; // ajuda na captura da mensagem de erro
+	private MessageSource messageSource;
 	
-	@ ResponseStatus(code = HttpStatus.BAD_REQUEST) // informa qual status serrá retornado ao client
+	@ ResponseStatus(code = HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(MethodArgumentNotValidException.class)
-	// informa ao spring que esse método deve ser chamado quando houver alguma exceção no em algum controller
-	// passamos no parametro do exceptionhandler o tipo de erro que ele irá tratar
-	// MethodArgumentNotValidException: trata erros de validação de formulário
-	public List<ErroDeFormularioDto> handle (MethodArgumentNotValidException exception) { // recebe uma lista com todas as exceptions lançadas
+	public List<ErroDeFormularioDto> handle (MethodArgumentNotValidException exception) {
 		
 		List<ErroDeFormularioDto> dto = new ArrayList<>();
 		
 		List<FieldError> fielderror = exception.getBindingResult().getFieldErrors();
 		
 		fielderror.forEach(e ->{
-			// e: menssagem de erro; LocaleContextHolder.getLocale: traduz a mensagem de erro para o idioma do cliente
 			String mensagem = messageSource.getMessage(e, LocaleContextHolder.getLocale()); 
 			ErroDeFormularioDto erro = new ErroDeFormularioDto(e.getField(), mensagem);
 			dto.add(erro);
