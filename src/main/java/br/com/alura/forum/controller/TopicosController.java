@@ -6,6 +6,8 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
@@ -40,8 +42,16 @@ public class TopicosController {
 	
 	@Autowired
 	private CursoRepository cursoRepository;
-	
+	/* USO DE CACHE!
+	 * Devemos utilizar o cache apenas em situações convenientes, em geral em tabelas que sobre pouca ou nem uma alteração,
+	 * dado que cachiar e limpar o cache com frequencia pode afetar negativament e a performace da api.
+	 Obs: o método lista foi apenas usado como exemplo da aplicação do cache, mas não é um bom exemplo para se cachiar em uma situação real*/
 	@GetMapping //usando o metodo GET.
+	@Cacheable(value = "listaTopicos") //@Cacheable: guarda em memoria o retorno desse método. identificador unico do cache desse método: value
+	/* O @Cacheable também guarda variações da chamada do método em cache
+	 * Ex.: retorno de todos os registros, retorno de um registro com o parametro nomeCurso, 
+	 * para cada valor no nomeCurso é guardado (caching) um retorno diferente.
+	 */
 	//para passar parametro no navegador: ?nomeCurso=Spring+Boot
 	public Page<TopicoDto> lista(@RequestParam(required = false) String nomeCurso, 
 			@PageableDefault(sort = "id", direction = Direction.DESC, size = 2) Pageable paginacao) {//recebe os dados por parametros da url.
@@ -77,6 +87,7 @@ public class TopicosController {
 	}
 	
 	@PostMapping //usando o metodo POST.
+	@CacheEvict(value = "listaTopicos", allEntries = true) //limpa o cache informado na variavel "value". E aplica isso em todo o cache, com parametro nomeCurso, sem e etc.
 	@Transactional // Anotação recomendada sempre que envolver uma operação de salvar, atualizar ou deletar (transactional)
 	//dentro do ResponseEntity vem o tipo de retorno que virá dentro do corpo da requisição.
 	public ResponseEntity<TopicoDto> cadastrar (@RequestBody @Valid TopicoForm form, UriComponentsBuilder uriBuilder) { 
@@ -115,6 +126,7 @@ public class TopicosController {
 	@PutMapping("/{id}") // método utilizado para realizar atualização de registros. id informa qual recurso será atualizado.
 	// Obs: existe também o método @PatchMapping para atualização. o put atualiza tudo e o patch atualiza apenas os atributos alterados.
 	@Transactional // informa ao spring que após a execução do método, deve executar as alterações no banco de dados
+	@CacheEvict(value = "listaTopicos", allEntries = true)
 	public ResponseEntity<TopicoDto> atualizar (@PathVariable Long id, @RequestBody @Valid AtualizacaoTopicoForm form){
 		
 		Optional<Topico> optional = topicoRepository.findById(id);
@@ -130,6 +142,7 @@ public class TopicosController {
 
 	@DeleteMapping("/{id}")
 	@Transactional
+	@CacheEvict(value = "listaTopicos", allEntries = true)
 	public ResponseEntity<?> remover (@PathVariable Long id) {
 		
 		Optional<Topico> optional = topicoRepository.findById(id);
