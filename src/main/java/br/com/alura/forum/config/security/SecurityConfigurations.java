@@ -51,7 +51,9 @@ public class SecurityConfigurations extends WebSecurityConfigurerAdapter { // po
 
 		http.authorizeRequests().antMatchers(HttpMethod.GET, "/topicos").permitAll() // libera a acesso para essa URI com o método GET
 			.antMatchers(HttpMethod.GET, "/topicos/*").permitAll() // libera a acesso para essa URI com o método GET
-			.antMatchers(HttpMethod.POST, "/auth").permitAll().anyRequest().authenticated() // todas as demais requests precisa de autenticação
+			.antMatchers(HttpMethod.POST, "/auth").permitAll()
+			.antMatchers(HttpMethod.GET, "/actuator/**").permitAll() //liberar todos os endpoints do actuator. não é uma boa pratica liberar todos (so para testes)
+			.anyRequest().authenticated() // todas as demais requests precisa de autenticação
 //			.and().formLogin(); //gera um formulário em bootstrap de autenticação (login). precisa implementar a logica de login.
 			.and().csrf().disable() // desabilitamos essa proteção pois agora faremos a autenticação via token
 			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)// informando que a autenticação será stateless
