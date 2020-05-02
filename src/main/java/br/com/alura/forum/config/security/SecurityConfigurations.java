@@ -63,7 +63,12 @@ public class SecurityConfigurations extends WebSecurityConfigurerAdapter { // po
 	// configurações de arquivos estáticos, exemplo: css, imagens e etc..
 	@Override
 	public void configure(WebSecurity web) throws Exception {
-
+		/* liberando as URLs com arquivos estáticos que o springfox swagger precisa para 
+		 * gerar a documentação automaticamente
+		 */
+		web.ignoring()
+			.antMatchers("/**.html", "/v2/api-docs", "/webjars/**", "/configuration/**", "/swagger-resources/**");
+		
 	}
 
 }
